@@ -3,7 +3,7 @@
 	margin: 10px 10px;
 
 	button {
-		border: solid 2px rgba(0,0,0,0);
+		border: solid 2px rgba(0, 0, 0, 0);
 		border-radius: 100%;
 		background-color: var(--grey0);
 		color: var(--grey7);
@@ -15,11 +15,12 @@
 		flex-shrink: 0;
 		cursor: pointer;
 
-		@media(any-hover: hover) {
+		@media (any-hover: hover) {
 			&:hover {
 				border-color: var(--grey1);
 			}
 		}
+		&:active,
 		&.expanded {
 			border-color: var(--grey1);
 			background-color: var(--grey1);
@@ -30,7 +31,7 @@
 		border: solid 1px var(--grey1);
 		border-radius: 5px;
 		background-color: var(--grey0);
-		box-shadow: 0px 3px 6px 0px var(--shade);
+		box-shadow: 0px 4px 12px -4px var(--shade);
 		text-align: left;
 		position: absolute;
 		bottom: 100%;
@@ -46,7 +47,7 @@
 			color: var(--grey7);
 			font-family: var(--body-font);
 			border-radius: 5px;
-			padding: 10px;
+			padding: 8px 16px;
 			cursor: pointer;
 			&:not(:last-child) {
 				margin-bottom: 4px;

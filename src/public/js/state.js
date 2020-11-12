@@ -2,14 +2,16 @@ import VIEW from './view';
 import CONNECTION_STATE from './connection-state';
 import GAME_PHASE from '../../common/game-phase';
 import MESSAGE from '../../common/message';
-import { generateClientGameState } from '../../common/cli-game';
+import { generateClientGameState } from './client-game';
 import { validateUsername } from '../../common/util';
 
 const socket = io();
+const sfx = new Audio('static/notification_simple-01.wav');
 
 const Store = {
 	state: {
 		username: localStorage.username || '',
+		sfxDisabled: localStorage.sfxDisabled === 'true',
 		view: VIEW.HOME,
 		previousView: VIEW.HOME,
 		gameState: undefined,
@@ -24,7 +26,11 @@ const Store = {
 	},
 	setLanguage(lang) {
 		this.state.language = lang;
-		localStorage.language = lang;
+    localStorage.language = lang;
+  },
+	toggleSfx() {
+		this.state.sfxDisabled = !this.state.sfxDisabled;
+		localStorage.sfxDisabled = this.state.sfxDisabled;
 	},
 	setView(view) {
 		this.state.previousView = this.state.view;
@@ -71,7 +77,7 @@ const Store = {
 	submitLeaveGame,
 	submitStartGame,
 	submitStroke,
-	submitSkipRound,
+	submitNextRound,
 	submitReturnToSetup,
 };
 
@@ -88,7 +94,13 @@ function handleSocket(messageName, handler, errHandler) {
 			handler(data);
 		}
 		if (data.roomState !== undefined) {
+			const prevStrokesLength = Store.state.gameState
+				? Store.state.gameState.strokes.length
+				: 0;
 			Store.setGameState(data.roomState);
+			if (!Store.state.sfxDisabled && prevStrokesLength < data.roomState.strokes.length) {
+				sfx.play();
+			}
 		}
 	});
 }
@@ -137,7 +149,7 @@ function submitCreateGame(username, language) {
 		});
 		return true;
 	} else {
-		this.setWarning('createWarning', usernameWarning);
+		this.setWarning('createWarning', usernameValidationWarning);
 		return false;
 	}
 }
@@ -151,7 +163,7 @@ function submitJoinGame(roomCode, username) {
 		});
 		return true;
 	} else {
-		this.setWarning('joinWarning', usernameWarning);
+		this.setWarning('joinWarning', usernameValidationWarning);
 		return false;
 	}
 }
@@ -166,8 +178,8 @@ function submitStroke(points) {
 		points: points,
 	});
 }
-function submitSkipRound() {
-	socket.emit(MESSAGE.SKIP_ROUND);
+function submitNextRound() {
+	socket.emit(MESSAGE.NEXT_ROUND);
 }
 function submitReturnToSetup() {
 	socket.emit(MESSAGE.RETURN_TO_SETUP);
@@ -177,6 +189,7 @@ socket.on('disconnect', function() {
 	Store.state.gameConnection = CONNECTION_STATE.DISCONNECT;
 	let existingGameState = Store.state.gameState;
 	if (existingGameState) {
+		let me = existingGameState.findUser(Store.state.username);
 		switch (existingGameState.phase) {
 			case GAME_PHASE.SETUP:
 				// if user was in room setup, just forget about the gamestate altogether
@@ -185,7 +198,6 @@ socket.on('disconnect', function() {
 				break;
 			case GAME_PHASE.PLAY:
 			case GAME_PHASE.VOTE:
-				let me = existingGameState.findUser(Store.state.username);
 				if (me) {
 					me.connected = false;
 				}
@@ -211,16 +223,12 @@ function reconnectToGame() {
 		socket.emit(MESSAGE.JOIN_ROOM, {
 			roomCode: existingGameState.roomCode,
 			username: username,
-			rejoin: true,
 		});
 	}
 }
 window.faodbg = {
 	dcon() {
 		socket.disconnect();
-	},
-	recon() {
-		reconnectToGame();
 	},
 	con() {
 		socket.connect();

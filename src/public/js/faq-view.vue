@@ -8,25 +8,53 @@
 					</div>
 					<div class="align-left">
 						<div class="qa">
-							<h3>I found a bug!</h3>
-							<p>
-								Bug reports are greatly appreciated! Contact me at
-								<em>fakeartistonline@gmail.com</em>, or post an issue on Github.
-							</p>
-							<h3>I accidentally quit my browser. Can I rejoin an in-progress game?</h3>
-							<p>This is on the to-do list!</p>
+							<h3>
+								I accidentally quit my browser. How do I rejoin an in-progress game?
+							</h3>
+							<p>Join the room again with your username exactly as it was.</p>
 						</div>
 						<div class="qa">
-							<h3>The website connection is spotty!</h3>
-							<p>FAO's currently on Heroku's free hosting service.</p>
-							<p>(I would like to get a proper server and domain at some point!)</p>
+							<h3>The site is slow / The site went down!</h3>
+							<p>
+								FAO's currently on Heroku's free hosting service, which has its
+								limitations. One day I'd like to set up a proper server and domain!
+							</p>
+							<p>
+								I also sometimes push updates, usually Mon/Tue, which causes server
+								maintenance. Apologies in advance!
+							</p>
+						</div>
+						<div class="qa">
+							<h3>I found a bug!</h3>
+							<p>
+								I appreciate bug reports! Post an issue on Github, or contact me at
+								<em>fakeartistonline@gmail.com</em>.
+							</p>
 						</div>
 						<div class="qa">
 							<h3>Will you implement ___?</h3>
 							<p>
 								FAO is meant to be fairly simple and adaptable for house rules, so
-								I'm not ambitious. Still, I'm open to suggestions. Reach me with the
-								email above.
+								I'm not super ambitious. Still, I'm open to suggestions. Make a
+								request on Github, or reach me with the email above.
+							</p>
+						</div>
+						<div class="qa">
+							<h3>Misc. about</h3>
+							<p>FAO is not affiliated with Oink Games.</p>
+							<p>
+								Notification SFX from
+								<a href="https://material.io/design/sound/sound-resources.html"></a>
+								(<a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a
+								>)
+							</p>
+							<p>
+								This is a one-man pet project, so I appreciate your patience for
+								fixes and features.
+							</p>
+							<p>
+								Also, this should go without saying, but please play with a modern
+								browser!
 							</p>
 						</div>
 					</div>
@@ -47,7 +75,6 @@ export default {
 	methods: {
 		back() {
 			Store.setView(VIEW.HOME);
-			// this.$router.push(VIEW.HOME);
 		},
 	},
 };

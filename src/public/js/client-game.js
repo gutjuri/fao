@@ -1,4 +1,4 @@
-import * as Color from './color';
+import * as Color from './player-colors';
 
 function generateClientGameState() {
 	return {
@@ -21,7 +21,9 @@ function generateClientGameState() {
 		},
 		getUserColor(username) {
 			let userIdx = this.getUsernames().findIndex((u) => u === username); // needs es6 polyfill
-			return userIdx >= 0 ? Color.HEX[Color.ORDER[userIdx]] || 'var(--grey6)' : 'var(--grey6)';
+			return userIdx >= 0
+				? Color.HEX[Color.ORDER[userIdx]] || 'var(--grey6)'
+				: 'var(--grey6)';
 		},
 		getMostRecentStroke() {
 			return this.strokes[this.strokes.length - 1];

@@ -1,12 +1,12 @@
-import User from '../common/user.js';
-import { ClientAdapter } from './game-room.js';
-import * as Schema from './schema.js';
-import * as Lobby from './lobby.js';
 import GAME_PHASE from '../common/game-phase.js';
-import GameError from './game-error.js';
-import debugLog from './debug-log.js';
-
 import MESSAGE from '../common/message.js';
+import User from '../common/user.js';
+import debugLog from './debug-log.js';
+import GameError from './game-error.js';
+import GamePrecond from './game-precond';
+import { ClientAdapter } from './game-room.js';
+import * as Lobby from './lobby.js';
+import * as Schema from './schema.js';
 
 function handleSockets(io) {
 	io.on('connection', function(sock) {
@@ -55,13 +55,16 @@ const MessageHandlers = {
 		GamePrecond.roomExists(data.roomCode);
 
 		let user;
+		const nameExistsInRoom = roomToJoin.findUser(data.username) !== undefined;
 
-		if (data.rejoin) {
+		if (nameExistsInRoom) {
+			// rejoin
 			GamePrecond.nameIsTakenInRoom(data.username, roomToJoin);
 			GamePrecond.gameInProgress(roomToJoin);
 			user = login(sock, data.username, roomToJoin);
 			joinRoom(user, roomToJoin, true, false);
 		} else {
+			// join for first time
 			GamePrecond.roomIsNotFull(roomToJoin);
 			GamePrecond.gameNotInProgress(roomToJoin);
 			GamePrecond.nameIsNotTakenInRoom(data.username, roomToJoin);
@@ -93,7 +96,7 @@ const MessageHandlers = {
 		rm.startNewRound();
 		broadcastRoomState(io, rm, MESSAGE.START_GAME);
 	},
-	[MESSAGE.SKIP_ROUND](io, sock, data) {
+	[MESSAGE.NEXT_ROUND](io, sock, data) {
 		GamePrecond.sockHasUser(sock);
 		GamePrecond.userIsInARoom(sock.user);
 		let rm = sock.user.gameRoom;
@@ -187,79 +190,6 @@ function joinRoom(user, room, rejoin, isHost = false) {
 	user.setGameRoom(room);
 	return room;
 }
-
-const GamePrecond = {
-	sockHasUser(sock) {
-		if (sock.user === undefined) {
-			throw new GameError('No user');
-		}
-	},
-	sockDoesNotHaveUser(sock) {
-		if (sock.user !== undefined) {
-			throw new GameError('Must not have user');
-		}
-	},
-	userIsInARoom(user) {
-		if (user.gameRoom === undefined) {
-			throw new GameError(`User ${user.name} should be in a room`, 'User must be in a room');
-		}
-	},
-	userIsNotInARoom(user) {
-		if (user.gameRoom !== undefined) {
-			throw new GameError(
-				'User must not be in a room. User is in room ' + user.gameRoom,
-				'User must not be in a room'
-			);
-		}
-	},
-	roomExists(roomCode) {
-		if (Lobby.getRoomByCode(roomCode) === undefined) {
-			throw new GameError(`Room-${roomCode} DNE`, 'This room is unavailable');
-		}
-	},
-	gameInProgress(room) {
-		if (!room.isGameInProgress()) {
-			throw new GameError('Game must be in progress');
-		}
-	},
-	gameNotInProgress(room) {
-		if (room.isGameInProgress()) {
-			throw new GameError('A game is already in progress');
-		}
-	},
-	roomIsNotFull(room) {
-		if (room.isFull()) {
-			throw new GameError(`Room ${room.roomCode} is full`, 'This room is full', true);
-		}
-	},
-	lobbyIsNotFull() {
-		if (Lobby.isFull()) {
-			throw new GameError('The lobby is at max capacity');
-		}
-	},
-	isUsersTurn(user) {
-		let room = user.gameRoom;
-		if (room.whoseTurn() !== user) {
-			throw new GameError("Not user's turn");
-		}
-	},
-	nameIsNotTakenInRoom(username, room) {
-		if (room.findUser(username)) {
-			throw new GameError(
-				`Username ${username} is taken in room ${room.roomCode}`,
-				'This username is taken in this room'
-			);
-		}
-	},
-	nameIsTakenInRoom(username, room) {
-		if (room.findUser(username) === undefined) {
-			throw new GameError(
-				`Username ${username} DNE in room ${room.roomCode}`,
-				"This username doesn't exist in this room"
-			);
-		}
-	},
-};
 
 // send roomstate update to all users, accounting for different roles (i.e., faker vs artist)
 function broadcastRoomState(io, room, messageName, addtlProcessFn) {
