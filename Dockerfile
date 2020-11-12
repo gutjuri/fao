@@ -10,4 +10,6 @@ COPY . .
 
 RUN npm run build
 
+USER nobody
+
 ENTRYPOINT ["npm", "run", "start"]
