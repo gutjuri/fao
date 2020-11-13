@@ -18,11 +18,13 @@
 						>.
 					</p>
 					<p>
-						Contribute:
-						<a href="https://github.com/kcgidw/fao">Github</a>
+						<a href="https://github.com/kcgidw/fao">Original git repository</a>
+					</p>
+          <p>
+						<a href="https://github.com/gutjuri/fao">Currently maintained branch</a>
 					</p>
 					<p>
-						Enjoy the game? Send a tip:
+						Enjoy the game? Send a tip to the original author:
 						<a href="https://ko-fi.com/krackocloud">Ko-fi</a>
 					</p>
 				</div>
